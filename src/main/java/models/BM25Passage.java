@@ -25,8 +25,11 @@ public class BM25Passage extends BM25 {
     @Override
     public double score(Posting p) {
 
-        float fractionBegin = Float.parseFloat(System.getProperty("passage.len.fraction.begin"));
-        float fractionEnd = Float.parseFloat(System.getProperty("passage.len.fraction.end"));
+//        float fractionBegin = Float.parseFloat(System.getProperty("passage.len.fraction.begin"));
+//        float fractionEnd = Float.parseFloat(System.getProperty("passage.len.fraction.end"));
+
+        float fractionBegin = 0.0f;
+        float fractionEnd = 0.25f;
 
         int doc_len = p.getDocumentLength();
         int positions[] = ((BlockPosting) p).getPositions();
