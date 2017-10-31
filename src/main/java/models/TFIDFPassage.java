@@ -27,7 +27,6 @@ public class TFIDFPassage extends TF_IDF{
 //        float fractionBegin = Float.parseFloat(System.getProperty("passage.len.fraction.begin"));
 //        float fractionEnd = Float.parseFloat(System.getProperty("passage.len.fraction.end"));
 
-
         float fractionBegin = 0.0f;
         float fractionEnd = 0.25f;
 
@@ -41,9 +40,9 @@ public class TFIDFPassage extends TF_IDF{
         // we increment by 1 to be inclusive of the last word of the doc
         if (passageEndIndex == doc_len) passageEndIndex++;
 
-        for(int i=passageBeginIndex; i<passageEndIndex; i++) {
+        for(int i=0; i< positions.length; i++) {
             if ((positions[i] >= passageBeginIndex) && (positions[i] < passageEndIndex)) tf++;
-        };
+        }
 
         return super.score(tf, passageEndIndex-passageBeginIndex);
     }

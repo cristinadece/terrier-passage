@@ -47,9 +47,7 @@ public class BM25Passage extends BM25 {
 
         for(int i=0; i< positions.length; i++) {
             if ((positions[i] >= passageBeginIndex) && (positions[i] < passageEndIndex)) tf++;
-        };
-
-
+        }
 
         return super.score(tf, passageEndIndex-passageBeginIndex);
     }
