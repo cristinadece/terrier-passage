@@ -3,6 +3,7 @@ package models;
 import org.terrier.matching.models.BM25;
 import org.terrier.structures.postings.BlockPosting;
 import org.terrier.structures.postings.Posting;
+import org.terrier.utility.ApplicationSetup;
 
 
 public class BM25Passage extends BM25 {
@@ -28,6 +29,10 @@ public class BM25Passage extends BM25 {
 //        float fractionBegin = Float.parseFloat(System.getProperty("passage.len.fraction.begin"));
 //        float fractionEnd = Float.parseFloat(System.getProperty("passage.len.fraction.end"));
 
+//        float fractionBegin = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.begin"));
+//        float fractionEnd = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.end"));
+
+
         float fractionBegin = 0.0f;
         float fractionEnd = 0.25f;
 
@@ -44,8 +49,14 @@ public class BM25Passage extends BM25 {
             if ((positions[i] >= passageBeginIndex) && (positions[i] < passageEndIndex)) tf++;
         };
 
+
+
         return super.score(tf, passageEndIndex-passageBeginIndex);
     }
+
+
+    //TODO: choose absolute doc len value - e.g. max 250, 500
+
 
     public static void main(String[] args){
         System.out.println("This is BM25");

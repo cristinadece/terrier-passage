@@ -1,3 +1,5 @@
+package stats;
+
 import org.terrier.structures.DocumentIndex;
 import org.terrier.structures.Index;
 

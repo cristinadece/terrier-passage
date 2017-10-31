@@ -24,8 +24,13 @@ public class TFIDFPassage extends TF_IDF{
     @Override
     public double score(Posting p) {
 
-        float fractionBegin = Float.parseFloat(System.getProperty("passage.len.fraction.begin"));
-        float fractionEnd = Float.parseFloat(System.getProperty("passage.len.fraction.end"));
+//        float fractionBegin = Float.parseFloat(System.getProperty("passage.len.fraction.begin"));
+//        float fractionEnd = Float.parseFloat(System.getProperty("passage.len.fraction.end"));
+
+
+        float fractionBegin = 0.0f;
+        float fractionEnd = 0.25f;
+
 
         int doc_len = p.getDocumentLength();
         int positions[] = ((BlockPosting) p).getPositions();
@@ -42,6 +47,8 @@ public class TFIDFPassage extends TF_IDF{
 
         return super.score(tf, passageEndIndex-passageBeginIndex);
     }
+
+    //TODO: choose absolute doc len value - e.g. max 500
 
     public static void main(String[] args){
         System.out.println("This is TF_IDF");
