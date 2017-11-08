@@ -3,6 +3,7 @@ package models;
 import org.terrier.matching.models.BM25;
 import org.terrier.structures.postings.BlockPosting;
 import org.terrier.structures.postings.Posting;
+import org.terrier.utility.ApplicationSetup;
 
 public class BM25PassageRelative extends BM25 {
 
@@ -24,12 +25,11 @@ public class BM25PassageRelative extends BM25 {
     @Override
     public double score(Posting p) {
 
-        float fractionBegin = Float.parseFloat(System.getProperty("passage.len.fraction.begin"));
-        float fractionEnd = Float.parseFloat(System.getProperty("passage.len.fraction.end"));
+        float fractionBegin = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.begin", "0.0"));
+        float fractionEnd = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.end", "0.25"));
         System.out.println("Frac begin: ".concat(String.valueOf(fractionBegin)));
         System.out.println("Frac end: ".concat(String.valueOf(fractionEnd)));
-
-
+        
 //        float fractionBegin = 0.0f;
 //        float fractionEnd = 0.25f;
 
