@@ -5,18 +5,17 @@ import org.terrier.structures.postings.BlockPosting;
 import org.terrier.structures.postings.Posting;
 import org.terrier.utility.ApplicationSetup;
 
-public class BM25PassageRelative extends BM25 {
 
-    float fractionBegin = 0.0f;
-    float fractionEnd= 0.25f;
+public class BM25PassageFixed extends BM25 {
+
+    int maxDocLen = 250;
 
     /**
      * This overrides the scoring of the WeightingModel (extended by BM25).
      *
      * We set passage delimiters:
-     *      passage.len.fraction.begin
-     *      passage.len.fraction.end
-     * e.g. [0,0.25) [0.25,0.5) [0.5,0.75) [0.75, 1]
+     *  - maxDocLen - fixed virtual doc leng - regardless of how long the document len is,
+     *  we consider maxDocLen or the actual docLen if docLen < maxDocLen
      *
      * We recalculate tf and doc length according to the limits of the passage
      * and pass it to the BM25 function
@@ -25,26 +24,23 @@ public class BM25PassageRelative extends BM25 {
      * @return the BM25 score after virtually altering the posting list according to
      * passage delimiters
      */
+
+
     @Override
     public double score(Posting p) {
 
-        float fractionBegin = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.begin", "0.0"));
-        float fractionEnd = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.end", "0.25"));
-
+        int maxDocLen = Integer.parseInt(ApplicationSetup.getProperty("passage.max.doc.len", "250"));
         int doc_len = p.getDocumentLength();
         int positions[] = ((BlockPosting) p).getPositions();
-
         int tf = 0;
-        int passageBeginIndex = (int) (fractionBegin * doc_len);
-        int passageEndIndex = (int) (fractionEnd * doc_len);
-        // we increment by 1 to be inclusive of the last word of the doc
-        if (passageEndIndex == doc_len) passageEndIndex++;
 
         for(int i=0; i< positions.length; i++) {
-            if ((positions[i] >= passageBeginIndex) && (positions[i] < passageEndIndex)) tf++;
+            if ((positions[i] < maxDocLen)) tf++;
         }
 
-        return super.score(tf, passageEndIndex-passageBeginIndex);
+        if (doc_len < maxDocLen){ maxDocLen = doc_len;}
+
+        return super.score(tf, maxDocLen);
     }
 
     @Override
@@ -53,15 +49,14 @@ public class BM25PassageRelative extends BM25 {
         String NEW_LINE = System.getProperty("line.separator");
 
         result.append(this.getClass().getName() + " Object with default values as {" + NEW_LINE);
-        result.append(" passage.len.fraction.begin: " + fractionBegin + NEW_LINE);
-        result.append(" passage.len.fraction.end " + fractionEnd + NEW_LINE);
+        result.append(" passage.max.doc.len: " + maxDocLen + NEW_LINE);
         result.append("}");
 
         return result.toString();
     }
 
     public static void main(String[] args){
-        System.out.println("This is BM25 Passage Relative Doc Len");
+        System.out.println("This is BM25 Passage with Fixed Doc Len!");
     }
 
 }
