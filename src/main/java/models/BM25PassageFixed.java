@@ -29,7 +29,7 @@ public class BM25PassageFixed extends BM25 {
     @Override
     public double score(Posting p) {
 
-        int maxDocLen = Integer.parseInt(ApplicationSetup.getProperty("passage.max.doc.len", "250"));
+        maxDocLen = Integer.parseInt(ApplicationSetup.getProperty("passage.max.doc.len", "250"));
         int doc_len = p.getDocumentLength();
         int positions[] = ((BlockPosting) p).getPositions();
         int tf = 0;

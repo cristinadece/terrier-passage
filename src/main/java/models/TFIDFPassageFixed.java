@@ -28,10 +28,11 @@ public class TFIDFPassageFixed extends TF_IDF{
     @Override
     public double score(Posting p) {
 
-        int maxDocLen = Integer.parseInt(ApplicationSetup.getProperty("passage.max.doc.len", "250"));
+        maxDocLen = Integer.parseInt(ApplicationSetup.getProperty("passage.max.doc.len", "250"));
         int doc_len = p.getDocumentLength();
         int positions[] = ((BlockPosting) p).getPositions();
         int tf = 0;
+        int df = 0;
 
         for(int i=0; i< positions.length; i++) {
             if ((positions[i] < maxDocLen)) tf++;
@@ -43,10 +44,12 @@ public class TFIDFPassageFixed extends TF_IDF{
     }
 
     //TODO: recalculate IDF!
-    private double my_score(double tf) {
+    private double my_score(double tf, int[] positions, int maxDocLen) {
+        //TODO: recount document frequency for virtual document
+        // recount Doc Freq by looking at the positions list in the postings
+
         // this is with smoothing
         double idf = WeightingModelLibrary.log(this.numberOfDocuments / this.documentFrequency + 1.0D);
-        //TODO: recount document frequency for virtual document
         return tf * idf;
     }
 

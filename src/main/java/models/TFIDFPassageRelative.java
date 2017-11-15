@@ -30,8 +30,8 @@ public class TFIDFPassageRelative extends TF_IDF{
     @Override
     public double score(Posting p) {
 
-        float fractionBegin = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.begin", "0.0"));
-        float fractionEnd = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.end", "0.25"));
+        fractionBegin = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.begin", "0.0"));
+        fractionEnd = Float.parseFloat(ApplicationSetup.getProperty("passage.len.fraction.end", "0.25"));
 
         int doc_len = p.getDocumentLength();
         int positions[] = ((BlockPosting) p).getPositions();
