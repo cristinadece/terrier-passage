@@ -1,6 +1,7 @@
 package models;
 
 import org.terrier.matching.models.TF_IDF;
+import org.terrier.matching.models.WeightingModel;
 import org.terrier.matching.models.WeightingModelLibrary;
 import org.terrier.structures.Index;
 import org.terrier.structures.postings.BlockPosting;
@@ -10,7 +11,7 @@ import org.terrier.utility.ApplicationSetup;
 
 import java.io.IOException;
 
-public class TFIDF_PassageFixedM extends TF_IDF{
+public class TFIDF_PassageFixedM extends WeightingModel {
 
     int maxDocLen = 250;
 
@@ -33,22 +34,27 @@ public class TFIDF_PassageFixedM extends TF_IDF{
 
 
     @Override
+    public String getInfo() {
+        return "TFIDF Matteo";
+    }
+
+    @Override
     public double score(Posting p) {
 
         maxDocLen = Integer.parseInt(ApplicationSetup.getProperty("passage.max.doc.len", "250"));
-        int doc_len = p.getDocumentLength();
         int positions[] = ((BlockPosting) p).getPositions();
         int tf = 0;
-
-        for(int i=0; i< positions.length; i++) {
+        for (int i = 0; i < positions.length; i++) {
             if ((positions[i] < maxDocLen)) tf++;
         }
 
-        if (doc_len < maxDocLen){ maxDocLen = doc_len;}
+        return score(tf, 0);
+    }
 
-        //TODO: these are hardcoded here, since the original attributes from the superclass are private
-        double k_1 = 1.2D;
-        double b = 0.75D;
+    @Override
+    public double score(double tf, double v1) {
+
+
 
         if (_df == null) {
 
@@ -58,13 +64,13 @@ public class TFIDF_PassageFixedM extends TF_IDF{
             Index index = Index.createIndex();
             try {
                 IterablePosting postings = index.getInvertedIndex().getPostings(index.getLexicon().getLexiconEntry(term_id).getValue());
-                while (!postings.endOfPostings()){
+                while (!postings.endOfPostings()) {
 
                     postings.next();
-                    int _positions[] = ((BlockPosting) postings).getPositions();
+                    int currPos[] = ((BlockPosting) postings).getPositions();
 
-                    for(int i=0; i< positions.length; i++) {
-                        if ((positions[i] < maxDocLen)) {
+                    for (int i = 0; i < currPos.length; i++) {
+                        if ((currPos[i] < maxDocLen)) {
                             df++;
                             break;
                         }
@@ -78,19 +84,8 @@ public class TFIDF_PassageFixedM extends TF_IDF{
 
         }
 
-        double Robertson_tf = k_1 * tf / (tf + k_1); //todo: is it ok? boh...
         double idf = WeightingModelLibrary.log(this.numberOfDocuments / _df + 1.0D);
-        return this.keyFrequency * Robertson_tf * idf;
-    }
-
-    //TODO: recalculate IDF!
-    private double my_score(double tf, int[] positions, int maxDocLen) {
-        //TODO: recount document frequency for virtual document
-        // recount Doc Freq by looking at the positions list in the postings
-
-        // this is with smoothing
-        double idf = WeightingModelLibrary.log(this.numberOfDocuments / this.documentFrequency + 1.0D);
-        return tf * idf;
+        return this.keyFrequency * tf * idf;
     }
 
     @Override
