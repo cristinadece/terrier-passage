@@ -1,8 +1,6 @@
 package models;
 
 import org.terrier.matching.models.TF_IDF;
-import org.terrier.matching.models.WeightingModel;
-import org.terrier.matching.models.WeightingModelLibrary;
 import org.terrier.structures.Index;
 import org.terrier.structures.postings.BlockPosting;
 import org.terrier.structures.postings.IterablePosting;
@@ -11,9 +9,15 @@ import org.terrier.utility.ApplicationSetup;
 
 import java.io.IOException;
 
-public class TFIDF_PassageFixedM extends WeightingModel {
+public class TFIDF_PassageFixedM extends TF_IDF {
 
     int maxDocLen = 250;
+
+
+    public TFIDF_PassageFixedM() {
+
+        maxDocLen = Integer.parseInt(ApplicationSetup.getProperty("passage.max.doc.len", "250"));
+    }
 
     /**
      * This overrides the scoring of the WeightingModel (extended by TFIDF).
@@ -29,63 +33,45 @@ public class TFIDF_PassageFixedM extends WeightingModel {
      * @return the TFIDF score after virtually altering the posting list according to
      * passage delimiters
      */
-
-    Integer _df = null;
-
-
-    @Override
-    public String getInfo() {
-        return "TFIDF Matteo";
-    }
-
     @Override
     public double score(Posting p) {
 
-        maxDocLen = Integer.parseInt(ApplicationSetup.getProperty("passage.max.doc.len", "250"));
         int positions[] = ((BlockPosting) p).getPositions();
         int tf = 0;
         for (int i = 0; i < positions.length; i++) {
             if ((positions[i] < maxDocLen)) tf++;
         }
 
-        return score(tf, 0);
+        return super.score(tf, Math.min(p.getDocumentLength(), maxDocLen));
     }
 
-    @Override
-    public double score(double tf, double v1) {
+    public void prepare() {
 
+        super.prepare();
+        this.averageDocumentLength = maxDocLen;
+        double df = this.documentFrequency;
+        int term_id = this.es.getTermId();
+        Index index = Index.createIndex();
+        try {
+            IterablePosting postings = index.getInvertedIndex().getPostings(index.getLexicon().getLexiconEntry(term_id).getValue());
+            while (!postings.endOfPostings()) {
 
+                postings.next();
+                int currPos[] = ((BlockPosting) postings).getPositions();
 
-        if (_df == null) {
-
-            int df = 0;
-
-            int term_id = this.es.getTermId();
-            Index index = Index.createIndex();
-            try {
-                IterablePosting postings = index.getInvertedIndex().getPostings(index.getLexicon().getLexiconEntry(term_id).getValue());
-                while (!postings.endOfPostings()) {
-
-                    postings.next();
-                    int currPos[] = ((BlockPosting) postings).getPositions();
-
-                    for (int i = 0; i < currPos.length; i++) {
-                        if ((currPos[i] < maxDocLen)) {
-                            df++;
-                            break;
-                        }
+                for (int i = 0; i < currPos.length; i++) {
+                    if ((currPos[i] < maxDocLen)) {
+                        df++;
+                        break;
                     }
                 }
-                _df = df;
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+            this.documentFrequency = df;
 
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        double idf = WeightingModelLibrary.log(this.numberOfDocuments / _df + 1.0D);
-        return this.keyFrequency * tf * idf;
     }
 
     @Override
