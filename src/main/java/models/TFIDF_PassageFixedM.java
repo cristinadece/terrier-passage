@@ -1,6 +1,7 @@
 package models;
 
 import org.terrier.matching.models.TF_IDF;
+import org.terrier.structures.DocumentIndex;
 import org.terrier.structures.Index;
 import org.terrier.structures.postings.BlockPosting;
 import org.terrier.structures.postings.IterablePosting;
@@ -12,7 +13,25 @@ import java.io.IOException;
 public class TFIDF_PassageFixedM extends TF_IDF {
 
     int maxDocLen = 250;
+    static double _avgDocLen;
 
+    static {
+
+        int maxDocLen = Integer.parseInt(ApplicationSetup.getProperty("passage.max.doc.len", "250"));
+
+        DocumentIndex documentIndex = Index.createIndex().getDocumentIndex();
+        double sum = 0;
+        for (int i = 0; i < documentIndex.getNumberOfDocuments(); i++) {
+            try {
+                sum += Math.min(documentIndex.getDocumentLength(i), maxDocLen);
+            } catch (IOException ex) {
+
+            }
+        }
+        _avgDocLen = sum / documentIndex.getNumberOfDocuments();
+
+
+    }
 
     public TFIDF_PassageFixedM() {
 
@@ -48,7 +67,7 @@ public class TFIDF_PassageFixedM extends TF_IDF {
     public void prepare() {
 
         super.prepare();
-        this.averageDocumentLength = maxDocLen;
+        this.averageDocumentLength = _avgDocLen;
         double df = this.documentFrequency;
         int term_id = this.es.getTermId();
         Index index = Index.createIndex();
