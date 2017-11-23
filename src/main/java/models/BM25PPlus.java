@@ -45,8 +45,8 @@ public class BM25PPlus extends WeightingModel{
         for(int i=0; i< positions.length; i++) {
 
             int pos = positions[i];
-            int w = (pos / passLen) + 1;
-            tf += 1.0 + (1.0 / Math.pow(w, 2));
+            int passage = (pos / passLen) + 1;
+            tf += 1.0 + (1.0 / passage);
         }
 
         return score(tf, docLen);
