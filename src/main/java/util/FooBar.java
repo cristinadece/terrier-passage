@@ -1,8 +1,7 @@
 package util;
 
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
+
+import gnu.trove.TObjectIntHashMap;
 import org.terrier.structures.Index;
 import org.terrier.structures.IndexOnDisk;
 import org.terrier.structures.MetaIndex;
@@ -19,14 +18,15 @@ public class FooBar {
 
         int numDocs = index.getCollectionStatistics().getNumberOfDocuments();
 
-        TObjectIntMap<String> docno = new TObjectIntHashMap<String>();
+        TObjectIntHashMap docno2docid = new TObjectIntHashMap();
+
         for (int docid = 0; docid < numDocs; docid++) {
 
-            docno.put(metaIndex.getItem("docno", docid), docid);
+            docno2docid.put(metaIndex.getItem("docno", docid), docid);
 
         }
 
-        int docid = docno.get("clueweb09-en0003-55-31884");
+        int docid = docno2docid.get("clueweb09-en0003-55-31884");
 
         System.out.printf("%d\n", docid);
 
