@@ -22,8 +22,9 @@ public class FooBar {
 
         for (int docid = 0; docid < numDocs; docid++) {
 
-            docno2docid.put(metaIndex.getItem("docno", docid), docid);
-
+            String s;
+            docno2docid.put(s = metaIndex.getItem("docno", docid), docid);
+            if (docid % 100000 == 0) System.out.println(s);
         }
 
         int docid = docno2docid.get("clueweb09-en0003-55-31884");
