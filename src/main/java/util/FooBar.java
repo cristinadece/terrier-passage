@@ -1,16 +1,58 @@
 package util;
 
 
+import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
+import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TObjectIntHashMap;
-import org.terrier.structures.Index;
-import org.terrier.structures.IndexOnDisk;
-import org.terrier.structures.MetaIndex;
+import org.terrier.applications.batchquerying.TRECQuerying;
+import org.terrier.matching.MatchingQueryTerms;
+import org.terrier.querying.SearchRequest;
+import org.terrier.structures.*;
+import org.terrier.structures.postings.BlockPosting;
+import org.terrier.structures.postings.IterablePosting;
+import org.terrier.utility.TerrierTimer;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-public class FooBar {
+class RelevanceAssessment implements Comparable<RelevanceAssessment> {
+
+    public int docid;
+    public int relevance;
+
+    public RelevanceAssessment(int docid, int relevance) {
+
+        this.docid = docid;
+        this.relevance = relevance;
+
+    }
+
+    @Override
+    public int compareTo(RelevanceAssessment o) {
+        return Integer.compare(docid, o.docid);
+    }
+}
+
+public class FooBar extends TRECQuerying{
+
+    public FooBar() {
+
+        super();
+
+    }
 
     public static void main(String[] args) throws IOException {
+
+        //SETUP
+
+        FooBar fb = new FooBar();
 
         IndexOnDisk index = Index.createIndex();
 
@@ -20,16 +62,105 @@ public class FooBar {
 
         TObjectIntHashMap docno2docid = new TObjectIntHashMap();
 
+        TerrierTimer tt = new TerrierTimer("Loading the metaindex in main memory for reverse lookup", numDocs);
+        tt.start();
         for (int docid = 0; docid < numDocs; docid++) {
 
-            String s;
-            docno2docid.put(s = metaIndex.getItem("docno", docid), docid);
-            if (docid % 100000 == 0) System.out.println(s);
+            docno2docid.put(metaIndex.getItem("docno", docid), docid);
+            tt.increment();
+        }
+        tt.finished();
+
+
+        TIntObjectHashMap<String[]> qid2terms = new TIntObjectHashMap<>();
+        while (fb.querySource.hasNext()) {
+
+            String query = fb.querySource.next();
+            String qidString = fb.querySource.getQueryId();
+            int qid = Integer.parseInt(qidString);
+
+            SearchRequest searchRequest = fb.queryingManager.newSearchRequest(
+                    qidString, query);
+
+            MatchingQueryTerms mqt = new MatchingQueryTerms(qidString);
+            searchRequest.getQuery().obtainQueryTerms(mqt);
+            String[] terms = mqt.getTerms();
+
+
+            qid2terms.put(qid, terms);
         }
 
-        int docid = docno2docid.get("clueweb09-en0003-55-31884");
+        String qrelName = args[0];
+        BufferedReader br = new BufferedReader(new FileReader(qrelName));
+        String line;
+        TIntObjectHashMap<List<RelevanceAssessment>> qid2qrel = new TIntObjectHashMap<>();
+        while ((line = br.readLine()) != null) {
 
-        System.out.printf("%d\n", docid);
+            String[] fields = line.split(" ");
+            int qid = Integer.parseInt(fields[0]);
+            String docno=fields[2];
+            int docid = docno2docid.get(docno);
+            int relevance = Integer.parseInt(fields[3]);
+
+            List<RelevanceAssessment> assessments;
+            if (qid2qrel.containsKey(qid)) {
+                assessments = qid2qrel.get(qid);
+            } else {
+                assessments = new ArrayList<>();
+                qid2qrel.put(qid, assessments);
+            }
+            assessments.add(new RelevanceAssessment(docid, relevance));
+        }
+        for (Object ra : qid2qrel.getValues()) Collections.sort((List<RelevanceAssessment>) ra);
+
+        //THE REAL THING
+        printPositions(index, metaIndex, docno2docid, qid2terms, qid2qrel);
+    }
+
+    private static void printPositions(IndexOnDisk index, MetaIndex metaIndex, TObjectIntHashMap docno2docid, TIntObjectHashMap<String[]> qid2terms, TIntObjectHashMap<List<RelevanceAssessment>> qid2qrel) throws IOException {
+
+        Lexicon<String> lexicon = index.getLexicon();
+        PostingIndex<?> invertedIndex = index.getInvertedIndex();
+
+        for (int qid : qid2terms.keys()) {
+
+            String[] terms = qid2terms.get(qid);
+            List<RelevanceAssessment> assessments = qid2qrel.get(qid);
+            List<IterablePosting> postingLists = new ArrayList<>();
+
+            for (String t : terms) {
+
+                LexiconEntry lexiconEntry = lexicon.getLexiconEntry(t);
+                if (lexiconEntry != null) {
+
+                    IterablePosting postings = invertedIndex.getPostings(lexiconEntry);
+                    postings.next(); //initialisation
+                    postingLists.add(postings);
+                }
+
+            }
+
+            for (RelevanceAssessment ra : assessments) {
+
+                int docid = ra.docid;
+                int doclen = 0;
+                TIntArrayList qtermPositions = new TIntArrayList();
+
+                for (IterablePosting ip : postingLists) {
+
+                    int _docid = ip.next(docid); //this must be done in increasing docid order
+                    if (_docid == docid) {
+                        qtermPositions.add(((BlockPosting) ip).getPositions());
+                        doclen = ip.getDocumentLength();
+                    }
+
+                }
+
+                //qid, docid, docno, doclen, rel, position
+                System.out.printf("%d\t%d\t%s\t%d\t%d\t%s\n", qid, docid, metaIndex.getItem("docno", docid), doclen, ra.relevance, Arrays.toString(qtermPositions.toNativeArray()));
+            }
+
+        }
 
     }
 }
