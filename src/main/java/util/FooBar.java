@@ -13,10 +13,7 @@ import org.terrier.structures.postings.BlockPosting;
 import org.terrier.structures.postings.IterablePosting;
 import org.terrier.utility.TerrierTimer;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,7 +37,7 @@ class RelevanceAssessment implements Comparable<RelevanceAssessment> {
     }
 }
 
-public class FooBar extends TRECQuerying{
+public class FooBar extends TRECQuerying {
 
     public FooBar() {
 
@@ -100,11 +97,10 @@ public class FooBar extends TRECQuerying{
 
             String[] fields = line.split(" ");
             int qid = Integer.parseInt(fields[0]);
-            String docno=fields[2];
-	    if (!docno2docid.contains(docno)) continue;
+            String docno = fields[2];
+            if (!docno2docid.contains(docno)) continue;
             int docid = docno2docid.get(docno);
             int relevance = Integer.parseInt(fields[3]);
-
 
 
             List<RelevanceAssessment> assessments;
@@ -116,7 +112,8 @@ public class FooBar extends TRECQuerying{
             }
             assessments.add(new RelevanceAssessment(docid, relevance));
         }
-        for (Object ra : qid2qrel.getValues()) Collections.sort((List<RelevanceAssessment>) ra);
+        for (Object ra : qid2qrel.getValues())
+            Collections.sort((List<RelevanceAssessment>) ra);
 
         //THE REAL THING
         printPositions(index, metaIndex, docno2docid, qid2terms, qid2qrel);
@@ -127,11 +124,13 @@ public class FooBar extends TRECQuerying{
         Lexicon<String> lexicon = index.getLexicon();
         PostingIndex<?> invertedIndex = index.getInvertedIndex();
 
+        PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+
         for (int qid : qid2terms.keys()) {
 
             String[] terms = qid2terms.get(qid);
             List<RelevanceAssessment> assessments = qid2qrel.get(qid);
-	    if (assessments == null) continue;
+            if (assessments == null) continue;
             List<IterablePosting> postingLists = new ArrayList<>();
 
             for (String t : terms) {
@@ -150,23 +149,24 @@ public class FooBar extends TRECQuerying{
 
                 int docid = ra.docid;
                 int doclen = 0;
-		int[][] qtermPositions = new int[postingLists.size()][0];
+                int[][] qtermPositions = new int[postingLists.size()][0];
 
                 for (int idx = 0; idx < postingLists.size(); idx++) {
 
-		    IterablePosting ip = postingLists.get(idx);
+                    IterablePosting ip = postingLists.get(idx);
                     int _docid = ip.next(docid); //this must be done in increasing docid order
                     if (_docid == docid) {
-                        qtermPositions[idx++]=((BlockPosting) ip).getPositions();
+                        qtermPositions[idx++] = ((BlockPosting) ip).getPositions();
                         doclen = ip.getDocumentLength();
                     }
 
                 }
 
                 //qid, docid, docno, doclen, rel, position
-                System.out.printf("TO_GREP\t%d\t%d\t%s\t%d\t%d\t%s\n", qid, docid, metaIndex.getItem("docno", docid), doclen, ra.relevance, Arrays.deepToString(qtermPositions));
+                pw.printf("%d\t%d\t%s\t%d\t%d\t%s\n", qid, docid, metaIndex.getItem("docno", docid), doclen, ra.relevance, Arrays.deepToString(qtermPositions));
             }
 
+            pw.close();
         }
 
     }
