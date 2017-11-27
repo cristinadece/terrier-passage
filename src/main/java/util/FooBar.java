@@ -75,6 +75,7 @@ public class FooBar extends TRECQuerying{
         TIntObjectHashMap<String[]> qid2terms = new TIntObjectHashMap<>();
         while (fb.querySource.hasNext()) {
 
+
             String query = fb.querySource.next();
             String qidString = fb.querySource.getQueryId();
             int qid = Integer.parseInt(qidString);
@@ -90,6 +91,7 @@ public class FooBar extends TRECQuerying{
             qid2terms.put(qid, terms);
         }
 
+
         String qrelName = args[0];
         BufferedReader br = new BufferedReader(new FileReader(qrelName));
         String line;
@@ -99,8 +101,11 @@ public class FooBar extends TRECQuerying{
             String[] fields = line.split(" ");
             int qid = Integer.parseInt(fields[0]);
             String docno=fields[2];
+	    if (!docno2docid.contains(docno)) continue;
             int docid = docno2docid.get(docno);
             int relevance = Integer.parseInt(fields[3]);
+
+
 
             List<RelevanceAssessment> assessments;
             if (qid2qrel.containsKey(qid)) {
@@ -126,6 +131,7 @@ public class FooBar extends TRECQuerying{
 
             String[] terms = qid2terms.get(qid);
             List<RelevanceAssessment> assessments = qid2qrel.get(qid);
+	    if (assessments == null) continue;
             List<IterablePosting> postingLists = new ArrayList<>();
 
             for (String t : terms) {
@@ -144,20 +150,21 @@ public class FooBar extends TRECQuerying{
 
                 int docid = ra.docid;
                 int doclen = 0;
-                TIntArrayList qtermPositions = new TIntArrayList();
+		int[][] qtermPositions = new int[postingLists.size()][0];
 
-                for (IterablePosting ip : postingLists) {
+                for (int idx = 0; idx < postingLists.size(); idx++) {
 
+		    IterablePosting ip = postingLists.get(idx);
                     int _docid = ip.next(docid); //this must be done in increasing docid order
                     if (_docid == docid) {
-                        qtermPositions.add(((BlockPosting) ip).getPositions());
+                        qtermPositions[idx++]=((BlockPosting) ip).getPositions();
                         doclen = ip.getDocumentLength();
                     }
 
                 }
 
                 //qid, docid, docno, doclen, rel, position
-                System.out.printf("%d\t%d\t%s\t%d\t%d\t%s\n", qid, docid, metaIndex.getItem("docno", docid), doclen, ra.relevance, Arrays.toString(qtermPositions.toNativeArray()));
+                System.out.printf("TO_GREP\t%d\t%d\t%s\t%d\t%d\t%s\n", qid, docid, metaIndex.getItem("docno", docid), doclen, ra.relevance, Arrays.deepToString(qtermPositions));
             }
 
         }
