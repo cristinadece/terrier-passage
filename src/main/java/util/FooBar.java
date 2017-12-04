@@ -156,16 +156,15 @@ public class FooBar extends TRECQuerying {
 
                     IterablePosting ip = postingLists.get(idx);
                     if (docid != ip.getId()) ip.next(docid); //go to next docid greater equal than docid
-                    if (docid == ip.getId()) qtermPositions[idx++] = ((BlockPosting) ip).getPositions(); //if you are on docid, then do your thing
-
+                    if (docid == ip.getId()) qtermPositions[idx] = ((BlockPosting) ip).getPositions(); //if you are on docid, then do your thing
                 }
 
                 //qid, docid, docno, doclen, rel, position
                 pw.printf("%d\t%d\t%s\t%d\t%d\t%s\n", qid, docid, metaIndex.getItem("docno", docid), doclen, ra.relevance, Arrays.deepToString(qtermPositions));
             }
 
-            pw.close();
         }
-
+        
+	pw.close();
     }
 }
