@@ -123,6 +123,7 @@ public class FooBar extends TRECQuerying {
 
         Lexicon<String> lexicon = index.getLexicon();
         PostingIndex<?> invertedIndex = index.getInvertedIndex();
+        DocumentIndex documentIndex = index.getDocumentIndex();
 
         PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
 
@@ -139,7 +140,7 @@ public class FooBar extends TRECQuerying {
                 if (lexiconEntry != null) {
 
                     IterablePosting postings = invertedIndex.getPostings(lexiconEntry);
-                    postings.next(); //initialisation
+                    postings.next(); //initialisation (because posting list starts from -1)
                     postingLists.add(postings);
                 }
 
@@ -148,17 +149,14 @@ public class FooBar extends TRECQuerying {
             for (RelevanceAssessment ra : assessments) {
 
                 int docid = ra.docid;
-                int doclen = 0;
+                int doclen = documentIndex.getDocumentLength(docid);
                 int[][] qtermPositions = new int[postingLists.size()][0];
 
                 for (int idx = 0; idx < postingLists.size(); idx++) {
 
                     IterablePosting ip = postingLists.get(idx);
-                    int _docid = ip.next(docid); //this must be done in increasing docid order
-                    if (_docid == docid) {
-                        qtermPositions[idx++] = ((BlockPosting) ip).getPositions();
-                        doclen = ip.getDocumentLength();
-                    }
+                    if (docid != ip.getId()) ip.next(docid); //go to next docid greater equal than docid
+                    if (docid == ip.getId()) qtermPositions[idx++] = ((BlockPosting) ip).getPositions(); //if you are on docid, then do your thing
 
                 }
 
