@@ -155,7 +155,7 @@ public class FooBar extends TRECQuerying {
                 for (int idx = 0; idx < postingLists.size(); idx++) {
 
                     IterablePosting ip = postingLists.get(idx);
-                    if (docid != ip.getId()) ip.next(docid); //go to next docid greater equal than docid
+                    if (docid < ip.getId()) ip.next(docid); //go to next docid greater equal than docid
                     if (docid == ip.getId()) qtermPositions[idx] = ((BlockPosting) ip).getPositions(); //if you are on docid, then do your thing
                 }
 
