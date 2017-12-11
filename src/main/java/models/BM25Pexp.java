@@ -13,18 +13,20 @@ public class BM25Pexp extends WeightingModel{
     private double k_3 = 8.0D;
     private double b = 0.75D;
     double w1 = 1, w2 = 1, w3 = 1, w4 = 1, w5 = 1, w6 =1;
+    String w = "111111";
 
     public BM25Pexp() {
 
         k_1 = Double.parseDouble(ApplicationSetup.getProperty("bm25p.k_1", "1.2"));
         k_3 = Double.parseDouble(ApplicationSetup.getProperty("bm25p.k_3", "8"));
         b = Double.parseDouble(ApplicationSetup.getProperty("bm25p.b", "0.75"));
-        w1 = Double.parseDouble(ApplicationSetup.getProperty("bm25p.w1", "1"));
-        w2 = Double.parseDouble(ApplicationSetup.getProperty("bm25p.w2", "1"));
-        w3 = Double.parseDouble(ApplicationSetup.getProperty("bm25p.w3", "1"));
-        w4 = Double.parseDouble(ApplicationSetup.getProperty("bm25p.w4", "1"));
-        w5 = Double.parseDouble(ApplicationSetup.getProperty("bm25p.w5", "1"));
-        w6 = Double.parseDouble(ApplicationSetup.getProperty("bm25p.w6", "1"));
+        w = ApplicationSetup.getProperty("bm25p.w", "111111");
+        w1 = Double.parseDouble(w.substring(0,1));
+        w2 = Double.parseDouble(w.substring(1,2));
+        w3 = Double.parseDouble(w.substring(2,3));
+        w4 = Double.parseDouble(w.substring(3,4));
+        w5 = Double.parseDouble(w.substring(4,5));
+        w6 = Double.parseDouble(w.substring(5,6));
 
     }
 
