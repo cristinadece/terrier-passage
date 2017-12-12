@@ -1,23 +1,31 @@
 package util;
 
-
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectIntHashMap;
-import org.terrier.applications.batchquerying.TRECQuerying;
-import org.terrier.matching.MatchingQueryTerms;
-import org.terrier.querying.SearchRequest;
-import org.terrier.structures.*;
-import org.terrier.structures.postings.BlockPosting;
-import org.terrier.structures.postings.IterablePosting;
-import org.terrier.utility.TerrierTimer;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.terrier.applications.batchquerying.TRECQuerying;
+import org.terrier.matching.MatchingQueryTerms;
+import org.terrier.querying.SearchRequest;
+import org.terrier.structures.DocumentIndex;
+import org.terrier.structures.Index;
+import org.terrier.structures.IndexOnDisk;
+import org.terrier.structures.Lexicon;
+import org.terrier.structures.LexiconEntry;
+import org.terrier.structures.MetaIndex;
+import org.terrier.structures.PostingIndex;
+import org.terrier.structures.postings.BlockPosting;
+import org.terrier.structures.postings.IterablePosting;
+import org.terrier.utility.TerrierTimer;
+
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TObjectIntHashMap;
 
 class RelevanceAssessment implements Comparable<RelevanceAssessment> {
 
@@ -37,19 +45,20 @@ class RelevanceAssessment implements Comparable<RelevanceAssessment> {
     }
 }
 
-public class FooBar extends TRECQuerying {
+public class Qrel2TxtData extends TRECQuerying {
 
-    public FooBar() {
+    public Qrel2TxtData() {
 
         super();
 
     }
 
-    public static void main(String[] args) throws IOException {
+    @SuppressWarnings("unchecked")
+	public static void main(String[] args) throws IOException {
 
         //SETUP
 
-        FooBar fb = new FooBar();
+        Qrel2TxtData fb = new Qrel2TxtData();
 
         IndexOnDisk index = Index.createIndex();
 
@@ -57,7 +66,7 @@ public class FooBar extends TRECQuerying {
 
         int numDocs = index.getCollectionStatistics().getNumberOfDocuments();
 
-        TObjectIntHashMap docno2docid = new TObjectIntHashMap();
+        TObjectIntHashMap<String> docno2docid = new TObjectIntHashMap<String>();
 
         TerrierTimer tt = new TerrierTimer("Loading the metaindex in main memory for reverse lookup", numDocs);
         tt.start();
@@ -112,6 +121,8 @@ public class FooBar extends TRECQuerying {
             }
             assessments.add(new RelevanceAssessment(docid, relevance));
         }
+        br.close();
+        
         for (Object ra : qid2qrel.getValues())
             Collections.sort((List<RelevanceAssessment>) ra);
 
@@ -119,11 +130,13 @@ public class FooBar extends TRECQuerying {
         printPositions(index, metaIndex, docno2docid, qid2terms, qid2qrel);
     }
 
-    private static void printPositions(IndexOnDisk index, MetaIndex metaIndex, TObjectIntHashMap docno2docid, TIntObjectHashMap<String[]> qid2terms, TIntObjectHashMap<List<RelevanceAssessment>> qid2qrel) throws IOException {
+    private static void printPositions(IndexOnDisk index, MetaIndex metaIndex, TObjectIntHashMap<String> docno2docid, TIntObjectHashMap<String[]> qid2terms, TIntObjectHashMap<List<RelevanceAssessment>> qid2qrel) throws IOException {
 
         Lexicon<String> lexicon = index.getLexicon();
         PostingIndex<?> invertedIndex = index.getInvertedIndex();
         DocumentIndex documentIndex = index.getDocumentIndex();
+        int N = index.getCollectionStatistics().getNumberOfDocuments();
+        double avgDocLen = index.getCollectionStatistics().getAverageDocumentLength();
 
         PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
 
@@ -133,6 +146,7 @@ public class FooBar extends TRECQuerying {
             List<RelevanceAssessment> assessments = qid2qrel.get(qid);
             if (assessments == null) continue;
             List<IterablePosting> postingLists = new ArrayList<>();
+            List<Integer> documentFrequencyList = new ArrayList<>();
 
             for (String t : terms) {
 
@@ -142,9 +156,14 @@ public class FooBar extends TRECQuerying {
                     IterablePosting postings = invertedIndex.getPostings(lexiconEntry);
                     postings.next(); //initialisation (because posting list starts from -1)
                     postingLists.add(postings);
+                    documentFrequencyList.add(lexiconEntry.getDocumentFrequency());
                 }
 
             }
+            
+            int[] documentFrequencies = new int[documentFrequencyList.size()];
+            for (int i = 0; i < documentFrequencies.length; i++) 
+            	documentFrequencies[i] = documentFrequencyList.get(i);
 
             for (RelevanceAssessment ra : assessments) {
 
@@ -159,8 +178,17 @@ public class FooBar extends TRECQuerying {
                     if (docid == ip.getId()) qtermPositions[idx] = ((BlockPosting) ip).getPositions(); //if you are on docid, then do your thing
                 }
 
-                //qid, docid, docno, doclen, rel, position
-                pw.printf("%d\t%d\t%s\t%d\t%d\t%s\n", qid, docid, metaIndex.getItem("docno", docid), doclen, ra.relevance, Arrays.deepToString(qtermPositions));
+                //qid, N, dfs, avgDL, docid, docno, doclen, rel, positions
+                pw.printf("%d\t%d\t%s\t%d\t%s\t%d\t%.5f\t%d\t%s\n", 
+                		qid,
+                		N,
+                		Arrays.toString(documentFrequencies),
+                		docid, 
+                		metaIndex.getItem("docno", docid), 
+                		doclen,
+                		avgDocLen,
+                		ra.relevance, 
+                		Arrays.deepToString(qtermPositions));
             }
 
         }
