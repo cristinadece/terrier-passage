@@ -1,10 +1,9 @@
 package util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Arrays;
 
+import com.sun.javafx.binding.StringFormatter;
 import org.terrier.applications.batchquerying.TRECQuerying;
 import org.terrier.matching.ResultSet;
 import org.terrier.querying.Request;
@@ -54,6 +53,13 @@ public class Optimizer extends TRECQuerying {
             qid2request.put(qid, searchRequest);
         }
 
+
+        // open file for writing
+		String[] filenameFullPath = args[args.length-1].split("/");
+        String FILENAME = filenameFullPath[filenameFullPath.length-1];
+		System.out.println("*** ".concat(FILENAME));
+		BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME));
+
         //THE REAL THING
         for (int w1=0; w1<6; w1++)
         	for (int w2=0; w2<6; w2++)
@@ -61,10 +67,12 @@ public class Optimizer extends TRECQuerying {
         			for (int w4=0; w4<6; w4++)
         				for (int w5=0; w5<6; w5++)
         					for (int w6=0; w6<6; w6++)
-        						optimizer.runQueries(qid2request, args, w1, w2, w3, w4, w5, w6);
+        						optimizer.runQueries(qid2request, args, bw, w1, w2, w3, w4, w5, w6);
+
+        bw.close();
     }
 
-	private void runQueries(TIntObjectHashMap<SearchRequest> qid2request, String[] trec_eval_args, int w1, int w2, int w3, int w4, int w5, int w6) throws IOException {
+	private void runQueries(TIntObjectHashMap<SearchRequest> qid2request, String[] trec_eval_args, BufferedWriter bw, int w1, int w2, int w3, int w4, int w5, int w6) throws IOException {
     	
     	BM25Pexp model = new BM25Pexp();
     	model.setCollectionStatistics(index.getCollectionStatistics());
@@ -102,8 +110,9 @@ public class Optimizer extends TRECQuerying {
     	System.arraycopy(trec_eval_args, 0, param, 0, trec_eval_args.length);
     	param[trec_eval_args.length] = tmpResFile.toPath().toString();
     	String[][] output = te.runAndGetOutput(param);
-    	    	
-    	System.out.printf("*** %d,%d,%d,%d,%d,%d,%s\n", w1, w2, w3, w4, w5, w6, Arrays.deepToString(output));
+
+		String sf = String.format("*** %d,%d,%d,%d,%d,%d,%s\n", w1, w2, w3, w4, w5, w6, Arrays.deepToString(output));
+    	bw.write(sf);
     	
     	tmpResFile.delete();
 	}
