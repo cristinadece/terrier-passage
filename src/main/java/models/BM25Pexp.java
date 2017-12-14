@@ -12,7 +12,7 @@ public class BM25Pexp extends WeightingModel{
     private double k_1 = 1.2D;
     private double k_3 = 8.0D;
     private double b = 0.75D;
-    double w1 = 1, w2 = 1, w3 = 1, w4 = 1, w5 = 1, w6 =1;
+    public double w1 = 1, w2 = 1, w3 = 1, w4 = 1, w5 = 1, w6 =1;
     String w = "111111";
 
     public BM25Pexp() {
@@ -71,5 +71,11 @@ public class BM25Pexp extends WeightingModel{
         double tf = w1 * tf_q1 + w2 * tf_q2 + w3 * tf_q3 + w4 * tf_q4 + w5 *tf_q5 + w6 * tf_q6;
         return score(tf, docLen);
     }
+
+	@Override
+	public String toString() {
+		
+		return "BM25PExp";
+	}
 
 }
