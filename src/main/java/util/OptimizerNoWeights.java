@@ -70,8 +70,9 @@ public class OptimizerNoWeights extends TRECQuerying {
     	ror.setup(index, model);
     	
     	for (int qid : qid2request.keys()) {
-			System.out.println("*** ".concat(outputFilename));
-			GZIPOutputStream gzipOS = new GZIPOutputStream(new FileOutputStream(outputFilename.concat("-qid-").concat(String.valueOf(qid)).concat(".txt")));
+    		String filename = String.format("%s%s%d%s", outputFilename, "-qid-", qid, ".txt.gz");
+			System.out.println("*** ".concat(filename));
+			GZIPOutputStream gzipOS = new GZIPOutputStream(new FileOutputStream(filename));
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(gzipOS, "UTF-8"));
     		
     		Request srq = (Request) qid2request.get(qid);
