@@ -18,7 +18,6 @@ import org.terrier.utility.ApplicationSetup;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.zip.GZIPOutputStream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -33,6 +32,7 @@ public class RankedOrTFPrint
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
+		int queryTermIdx;
 		IterablePosting posting = null;
 		int doc_freq_in_coll = 0; // need this for scoring
 		int term_freq_in_coll = 0; // need this for scoring
@@ -124,6 +124,7 @@ public class RankedOrTFPrint
 		if (enums.size() == 0) {
 			return new QueryResultSet(0);
 		}
+		int numOfQueryTerms = enums.size();
 
 		String qid = searchRequest.getQueryID();
 		int[] documentFrequencies = new int[enums.size()];
@@ -145,11 +146,11 @@ public class RankedOrTFPrint
         	//System.err.println(currentDocid);
         	Result result = new Result(currentDocid);
         	int nextDocid = Integer.MAX_VALUE;
-        	List<int[]> positions = new ArrayList<>();
+        	int[][] positions = new int[numOfQueryTerms][0];
         	for (int i = 0; i < enums.size(); i++) {
         		IterablePosting p = enums.get(i).posting;
         		if (p.getId() == currentDocid) {
-					positions.add(((BlockPosting) p).getPositions());
+        			positions[enums.get(i).queryTermIdx] = ((BlockPosting) p).getPositions();
         			result.updateScore((float) mWeightingModel.score(p.getFrequency(), p.getDocumentLength()));
         			if (p.endOfPostings()) {
         				toRemove.add(enums.get(i));
@@ -166,25 +167,26 @@ public class RankedOrTFPrint
         	String docno = mMetaIndex.getItem("docno", docid);
 			int doclen = mDocIndex.getDocumentLength(docid);
 
-			int tf_q1 = 0, tf_q2 = 0, tf_q3 = 0, tf_q4 = 0, tf_q5 = 0, tf_q6 =0;
+			int[][] termTfArray = new int[numOfQueryTerms][6];
+			//int tf_q1 = 0, tf_q2 = 0, tf_q3 = 0, tf_q4 = 0, tf_q5 = 0, tf_q6 =0;
 
-			for (int[] positionArray : positions) {
+			for (int queryTermIdx = 0; queryTermIdx < numOfQueryTerms; queryTermIdx++) {
 
-				for (int pos : positionArray) {
+				for (int pos : positions[queryTermIdx]) {
 
-					if (pos < q1) tf_q1++;
-					else if (pos < q2) tf_q2++;
-					else if (pos < q3) tf_q3++;
-					else if (pos < q4) tf_q4++;
-					else if (pos < q5) tf_q5++;
-					else tf_q6++;
+					if (pos < q1) termTfArray[queryTermIdx][0]++;
+					else if (pos < q2) termTfArray[queryTermIdx][1]++;
+					else if (pos < q3) termTfArray[queryTermIdx][2]++;
+					else if (pos < q4) termTfArray[queryTermIdx][3]++;
+					else if (pos < q5) termTfArray[queryTermIdx][4]++;
+					else termTfArray[queryTermIdx][5]++;
 
 				}
 
 			}
 
 			//qid, N, dfs, avgDL, docid, docno, doclen, rel, positions
-			String line = String.format("%s\t%d\t%s\t%.5f\t%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+			String line = String.format("%s\t%d\t%s\t%.5f\t%d\t%s\t%d\t%s\n",
 					qid,
 					N,
 					Arrays.toString(documentFrequencies),
@@ -192,7 +194,7 @@ public class RankedOrTFPrint
 					docid,
 					docno,
 					doclen,
-					tf_q1, tf_q2, tf_q3, tf_q4, tf_q5, tf_q6);
+					Arrays.deepToString(termTfArray));
 			bw.write(line);
 
 
@@ -255,7 +257,9 @@ public class RankedOrTFPrint
 		        return Integer.compare(o1.doc_freq_in_coll, o2.doc_freq_in_coll);
 		    }
 		});
-		
+
+		for (int queryTermIdx = 0; queryTermIdx < enums.size(); queryTermIdx++) enums.get(queryTermIdx).queryTermIdx = queryTermIdx;
+
 		return enums;
 	}
 
