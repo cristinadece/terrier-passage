@@ -8,11 +8,10 @@ import org.terrier.matching.ResultSet;
 import org.terrier.querying.Request;
 import org.terrier.querying.SearchRequest;
 import org.terrier.structures.IndexUtil;
-import org.terrier.utility.ApplicationSetup;
-import uk.ac.gla.terrier.jtreceval.trec_eval;
+
 
 import java.io.*;
-import java.util.Arrays;
+import java.util.zip.GZIPOutputStream;
 
 /*
  * java -server -Xmx32G -cp target/terrier-passage-1.0-SNAPSHOT-jar-with-dependencies.jar \
@@ -51,16 +50,16 @@ public class OptimizerNoWeights extends TRECQuerying {
 
         // open file for writing
 		String filenameFullPath = args[args.length-1];
-		System.out.println("*** ".concat(filenameFullPath));
-		BufferedWriter bw = new BufferedWriter(new FileWriter(filenameFullPath));
+//		BufferedWriter bw = new BufferedWriter(new FileWriter(filenameFullPath));
+
 
         //THE REAL THING
-		optimizer.runQueries(qid2request, bw);
+		optimizer.runQueries(qid2request, filenameFullPath);
 
-        bw.close();
+
     }
 
-	private void runQueries(TIntObjectHashMap<SearchRequest> qid2request, BufferedWriter bw) throws IOException {
+	private void runQueries(TIntObjectHashMap<SearchRequest> qid2request, String outputFilename) throws IOException {
     	
     	BM25Pexp model = new BM25Pexp();
     	model.setCollectionStatistics(index.getCollectionStatistics());
@@ -71,9 +70,14 @@ public class OptimizerNoWeights extends TRECQuerying {
     	ror.setup(index, model);
     	
     	for (int qid : qid2request.keys()) {
+			System.out.println("*** ".concat(outputFilename));
+			GZIPOutputStream gzipOS = new GZIPOutputStream(new FileOutputStream(outputFilename.concat("-qid-").concat(String.valueOf(qid)).concat(".txt")));
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(gzipOS, "UTF-8"));
     		
     		Request srq = (Request) qid2request.get(qid);
     		ResultSet results = ror.match(srq, bw);
+
+			bw.close();
     	}
 	}
 }

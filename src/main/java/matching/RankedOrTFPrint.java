@@ -18,6 +18,7 @@ import org.terrier.utility.ApplicationSetup;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -205,7 +206,7 @@ public class RankedOrTFPrint
         	return new QueryResultSet(0);
 
         } else {
-        	
+
         	int[] docids = new int[heap.size()];
         	double[] scores = new double[heap.size()];
         	short[] occurrences = new short[heap.size()]; //watch out, this is 1 filled!, it's a dummy variable
