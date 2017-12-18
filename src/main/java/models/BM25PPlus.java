@@ -8,6 +8,11 @@ import org.terrier.utility.ApplicationSetup;
 
 public class BM25PPlus extends WeightingModel{
 
+    /**
+     * Applies a decreasing function over the weight of each passage (passages have
+     * fixe length)
+     */
+
     private static final long serialVersionUID = 1L;
     private double k_1 = 1.2D;
     private double k_3 = 8.0D;

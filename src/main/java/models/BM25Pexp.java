@@ -7,6 +7,9 @@ import org.terrier.structures.postings.Posting;
 import org.terrier.utility.ApplicationSetup;
 
 public class BM25Pexp extends WeightingModel{
+    /**
+     * The class changes
+     */
 
     private static final long serialVersionUID = 1L;
     private double k_1 = 1.2D;

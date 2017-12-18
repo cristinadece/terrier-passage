@@ -9,6 +9,10 @@ import org.terrier.utility.ApplicationSetup;
 
 public class BM25P extends WeightingModel{
 
+    /**
+     * Splits each document in 4 equal parts
+     */
+
     private static final long serialVersionUID = 1L;
     private double k_1 = 1.2D;
     private double k_3 = 8.0D;
