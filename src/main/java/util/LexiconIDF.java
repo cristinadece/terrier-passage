@@ -19,7 +19,7 @@ public class LexiconIDF {
             Map.Entry<String, LexiconEntry> entry = iterator.next();
             String term = entry.getKey();
             double idf = WeightingModelLibrary.log(numberOfDocuments / entry.getValue().getDocumentFrequency() + 1.0D);
-            System.out.println(String.format("%s %.5f", term, idf));
+            System.out.println(String.format("%s %d %.5f", term, entry.getValue().getDocumentFrequency(), idf));
         }
     }
 
