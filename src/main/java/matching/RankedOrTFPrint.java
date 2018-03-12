@@ -185,8 +185,10 @@ public class RankedOrTFPrint
 
 			}
 
+			float score = result.getScore();
+
 			//qid, N, dfs, avgDL, docid, docno, doclen, rel, positions
-			String line = String.format("%s\t%d\t%s\t%.5f\t%d\t%s\t%d\t%s\n",
+			String line = String.format("%s\t%d\t%s\t%.5f\t%d\t%s\t%d\t%s\t%.5f\n",
 					qid,
 					N,
 					Arrays.toString(documentFrequencies),
@@ -194,7 +196,8 @@ public class RankedOrTFPrint
 					docid,
 					docno,
 					doclen,
-					Arrays.deepToString(termTfArray));
+					Arrays.deepToString(termTfArray),
+					score);
 			bw.write(line);
 
 

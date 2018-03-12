@@ -77,7 +77,6 @@ public class BM25Pexp extends WeightingModel{
 
 	@Override
 	public String toString() {
-		
 		return "BM25PExp";
 	}
 
