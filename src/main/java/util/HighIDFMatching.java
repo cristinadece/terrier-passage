@@ -46,7 +46,7 @@ public class HighIDFMatching {
         tt.finished();
 
 
-        PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+        PrintWriter pw = new PrintWriter(new FileWriter("HighIDFTermsWithPositions.txt"));
         Iterator<Map.Entry<String, LexiconEntry>> iterator = index.getLexicon().iterator();
         while (iterator.hasNext()) {
 
@@ -69,6 +69,7 @@ public class HighIDFMatching {
                 }
             }
         }
+        pw.close();
     }
 
     private static void printPositions(String term, int docid, String termPosting, PrintWriter pw) throws IOException {
