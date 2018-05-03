@@ -49,26 +49,30 @@ public class BM25P10 extends WeightingModel{
     @Override
     public double score(Posting p) {
 
+        double tf = 0.0;
         int docLen = p.getDocumentLength();
 
-        int[] tf_passage = new int[num_passage]; //initialized to 0
-
-        int positions[] = ((BlockPosting) p).getPositions();
-        for (int i=0; i < positions.length; i++) {
-            int pos = positions[i];
-            if (pos/(docLen/num_passage) == num_passage){
-                // this is for trailing words at the end of the document,less than 10
-                tf_passage[(pos/(docLen/num_passage))-1]++; // the last bin!
-            }
-            else {
-                tf_passage[pos/(docLen/num_passage)]++;
-            }
-
+        if (docLen/num_passage == 0){ //todo: not sure about this fix!!!
+            tf = 1;
         }
+        else {
 
-        double tf = 0.0;
-        for (int i=0; i < num_passage; i++){
-            tf += weights[i]*tf_passage[i];
+            int[] tf_passage = new int[num_passage]; //initialized to 0
+
+            int positions[] = ((BlockPosting) p).getPositions();
+            for (int i = 0; i < positions.length; i++) {
+                int pos = positions[i];
+                if (pos / (docLen / num_passage) == num_passage) {
+                    // this is for trailing words at the end of the document,less than 10
+                    tf_passage[(pos / (docLen / num_passage)) - 1]++; // the last bin!
+                } else {
+                    tf_passage[pos / (docLen / num_passage)]++;
+                }
+            }
+
+            for (int i = 0; i < num_passage; i++) {
+                tf += weights[i] * tf_passage[i];
+            }
         }
 
         return score(tf, docLen);
