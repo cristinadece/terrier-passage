@@ -61,8 +61,8 @@ public class BM25P10 extends WeightingModel{
 
             int positions[] = ((BlockPosting) p).getPositions();
             for (int i = 0; i < positions.length; i++) {
-                int pos = positions[i];
-                tf_passage[pos * num_passage / docLen]++;
+                float pos = positions[i];
+                tf_passage[Math.round(pos * num_passage / docLen)]++;
             }
 
             for (int i = 0; i < num_passage; i++) {
