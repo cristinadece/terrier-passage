@@ -62,10 +62,13 @@ public class BM25P10 extends WeightingModel{
             int positions[] = ((BlockPosting) p).getPositions();
             for (int i = 0; i < positions.length; i++) {
                 int pos = positions[i];
+                System.out.println(String.valueOf(pos)+" "+ String.valueOf(docLen)+" "+ String.valueOf(num_passage));
                 if (pos / (docLen / num_passage) == num_passage) {
                     // this is for trailing words at the end of the document,less than 10
                     tf_passage[(pos / (docLen / num_passage)) - 1]++; // the last bin!
-                } else {
+                }
+                else {
+
                     tf_passage[pos / (docLen / num_passage)]++;
                 }
             }
