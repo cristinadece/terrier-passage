@@ -90,10 +90,10 @@ public class BM25P10 extends WeightingModel{
             }
 
 //            System.out.println("Positions: ".concat(Arrays.toString(positions)));
-//            System.out.println("TF array: ".concat(Arrays.toString(tf_passage)));
+//            System.out.println("TF array: ".concat(Arrays.toString(tf_passage)));s
         }
 
-
+        System.out.print(String.valueOf(tf).concat("\t"));
         double score1 = score(tf, docLen);
         System.out.println(String.valueOf(score1));
         return score1;
