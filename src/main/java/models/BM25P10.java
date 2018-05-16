@@ -6,6 +6,8 @@ import org.terrier.structures.postings.BlockPosting;
 import org.terrier.structures.postings.Posting;
 import org.terrier.utility.ApplicationSetup;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 
 public class BM25P10 extends WeightingModel{
@@ -93,7 +95,8 @@ public class BM25P10 extends WeightingModel{
 //            System.out.println("TF array: ".concat(Arrays.toString(tf_passage)));s
         }
 
-        System.out.print(String.valueOf(tf).concat("\t"));
+        NumberFormat formatter = new DecimalFormat("#0.00");
+        System.out.print(formatter.format(tf).concat("\t"));
         double score1 = score(tf, docLen);
         System.out.println(String.valueOf(score1));
         return score1;
