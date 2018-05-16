@@ -52,8 +52,22 @@ public class BM25P10 extends WeightingModel{
         double tf = 0.0;
         int docLen = p.getDocumentLength();
 
-        if (docLen/num_passage == 0){ //todo: not sure about this fix!!!
-            tf = 1;
+        if (docLen/num_passage == 0){
+
+            int[] tf_passage = new int[docLen]; //doclen is less than 10
+            int[] tf_passage = new int[docLen]; //doclen is less than 10
+
+            int positions[] = ((BlockPosting) p).getPositions();
+            for (int i = 0; i < positions.length; i++) {
+                float pos = positions[i];
+                tf_passage[Math.round(pos * (num_passage-1) / docLen)]++;
+            }
+
+            for (int i = 0; i < docLen; i++) {
+                tf += weights[i] * tf_passage[i];
+            }
+
+
         }
         else {
 
