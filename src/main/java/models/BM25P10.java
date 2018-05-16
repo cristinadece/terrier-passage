@@ -41,7 +41,7 @@ public class BM25P10 extends WeightingModel{
     public double score(double tf, double docLength) {
         //this is plain bm25 copied from TERRIER, 'cos no code reutilisation was possible
         double K = this.k_1 * (1.0D - this.b + this.b * docLength / this.averageDocumentLength);
-        System.out.println("tf/(K+tf): ".concat(String.valueOf(tf / (K + tf))));
+        System.out.print((String.valueOf(tf / (K + tf))).concat("\t"));
         return WeightingModelLibrary.log((this.numberOfDocuments - this.documentFrequency + 0.5D) /
                 (this.documentFrequency + 0.5D)) * ((this.k_1 + 1.0D) * tf / (K + tf)) *
                 ((this.k_3 + 1.0D) * this.keyFrequency / (this.k_3 + this.keyFrequency));
@@ -52,9 +52,9 @@ public class BM25P10 extends WeightingModel{
 
         double tf = 0.0;
         int docLen = p.getDocumentLength();
-        
-        System.out.println();
-        System.out.println("Doc len: ".concat(String.valueOf(docLen)));
+
+        System.out.print(String.valueOf(p.getId()).concat(" "));
+//        System.out.println("Doc len: ".concat(String.valueOf(docLen)));
 
         if (docLen/num_passage == 0){
 
@@ -70,8 +70,8 @@ public class BM25P10 extends WeightingModel{
                 tf += weights[i] * tf_passage[i];
             }
 
-            System.out.println("Positions: ".concat(Arrays.toString(positions)));
-            System.out.println("TF array: ".concat(Arrays.toString(tf_passage)));
+//            System.out.println("Positions: ".concat(Arrays.toString(positions)));
+//            System.out.println("TF array: ".concat(Arrays.toString(tf_passage)));
 
 
         }
@@ -89,11 +89,14 @@ public class BM25P10 extends WeightingModel{
                 tf += weights[i] * tf_passage[i];
             }
 
-            System.out.println("Positions: ".concat(Arrays.toString(positions)));
-            System.out.println("TF array: ".concat(Arrays.toString(tf_passage)));
+//            System.out.println("Positions: ".concat(Arrays.toString(positions)));
+//            System.out.println("TF array: ".concat(Arrays.toString(tf_passage)));
         }
 
-        return score(tf, docLen);
+
+        double score1 = score(tf, docLen);
+        System.out.println(String.valueOf(score1));
+        return score1;
     }
 
     @Override
