@@ -55,7 +55,6 @@ public class BM25P10 extends WeightingModel{
         if (docLen/num_passage == 0){
 
             int[] tf_passage = new int[docLen]; //doclen is less than 10
-            int[] tf_passage = new int[docLen]; //doclen is less than 10
 
             int positions[] = ((BlockPosting) p).getPositions();
             for (int i = 0; i < positions.length; i++) {
