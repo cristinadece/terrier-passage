@@ -66,43 +66,20 @@ public class BM25P10 extends WeightingModel{
         int docLen = p.getDocumentLength();
 
         System.out.print(String.valueOf(p.getId()).concat("\t").concat(String.valueOf(docLen)).concat("\t"));
-//        System.out.println("Doc len: ".concat(String.valueOf(docLen)));
+        System.out.println("Doc len: ".concat(String.valueOf(docLen)));
 
-        if (docLen/num_passage == 0){
+        int[] tf_passage = new int[num_passage]; //initialized to 0
 
-            int[] tf_passage = new int[docLen]; //doclen is less than 10
-
+        if (docLen > 0) {
             int positions[] = ((BlockPosting) p).getPositions();
             for (int i = 0; i < positions.length; i++) {
-                float pos = positions[i];
-                tf_passage[Math.round(pos * (num_passage-1) / docLen)]++;
-            }
-
-            for (int i = 0; i < docLen; i++) {
-                tf += weights[i] * tf_passage[i];
-            }
-
-//            System.out.println("Positions: ".concat(Arrays.toString(positions)));
-//            System.out.println("TF array: ".concat(Arrays.toString(tf_passage)));
-
-
-        }
-        else {
-
-            int[] tf_passage = new int[num_passage]; //initialized to 0
-
-            int positions[] = ((BlockPosting) p).getPositions();
-            for (int i = 0; i < positions.length; i++) {
-                float pos = positions[i];
-                tf_passage[Math.round(pos * (num_passage-1) / docLen)]++;
+                double pos = (double) positions[i];
+                tf_passage[(int) Math.floor(pos * num_passage / docLen)]++;
             }
 
             for (int i = 0; i < num_passage; i++) {
                 tf += weights[i] * tf_passage[i];
             }
-
-//            System.out.println("Positions: ".concat(Arrays.toString(positions)));
-//            System.out.println("TF array: ".concat(Arrays.toString(tf_passage)));s
         }
 
         NumberFormat formatter = new DecimalFormat("#0.00");
