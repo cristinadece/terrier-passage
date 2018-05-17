@@ -44,6 +44,16 @@ public class BM25P10 extends WeightingModel{
         //this is plain bm25 copied from TERRIER, 'cos no code reutilisation was possible
         double K = this.k_1 * (1.0D - this.b + this.b * docLength / this.averageDocumentLength);
         System.out.print((String.valueOf(tf / (K + tf))).concat("\t"));
+
+        StringBuilder ss = new StringBuilder();
+        ss.append(this.numberOfDocuments).append("|")
+                .append(this.documentFrequency).append("|")
+                .append(this.k_1).append("|")
+                .append(K).append("|")
+                .append(this.k_3).append("|")
+                .append(this.keyFrequency);
+        System.out.print(ss.toString().concat("\t"));
+
         return WeightingModelLibrary.log((this.numberOfDocuments - this.documentFrequency + 0.5D) /
                 (this.documentFrequency + 0.5D)) * ((this.k_1 + 1.0D) * tf / (K + tf)) *
                 ((this.k_3 + 1.0D) * this.keyFrequency / (this.k_3 + this.keyFrequency));
