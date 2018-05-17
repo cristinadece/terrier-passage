@@ -66,8 +66,7 @@ public class BM25P10 extends WeightingModel{
         int docLen = p.getDocumentLength();
 
         System.out.print(String.valueOf(p.getId()).concat("\t").concat(String.valueOf(docLen)).concat("\t"));
-        System.out.println("Doc len: ".concat(String.valueOf(docLen)));
-
+       
         int[] tf_passage = new int[num_passage]; //initialized to 0
 
         if (docLen > 0) {
