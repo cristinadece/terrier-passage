@@ -27,7 +27,7 @@ public class BM25PAlpha extends WeightingModel{
     private int alpha = 10;
     private int p = 10;
     String w = "[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]";
-    double[] weights;
+    double[] weights = new double[p]; // this will change to a different size in constructor
 
 
     /**
@@ -42,7 +42,8 @@ public class BM25PAlpha extends WeightingModel{
         p = Integer.parseInt(ApplicationSetup.getProperty("bm25p.p", "10"));
         w = ApplicationSetup.getProperty("bm25p.w", "[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]");
 
-        double[] weights = new double[p];
+        weights = new double[p];
+        System.out.println("Number of passages: " + String.valueOf(p));
         String[] split_w = w.replace("[","").replace("]", "").split(",");
         weights = Arrays.stream(split_w)
                 .mapToDouble(Double::parseDouble)
