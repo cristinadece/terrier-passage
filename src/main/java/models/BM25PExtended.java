@@ -49,7 +49,8 @@ public class BM25PExtended extends WeightingModel{
         // we start adding 1 up to a certain percentage
         if (percentage <= weights.length) {
             for (int i = 0; i < percentage; i++) {
-                weights[i] = 1.0;
+//                weights[i] = 1.0; // Incremental from 1..100
+                weights[weights.length-1-i] = 1.0; // Decremental from 100..1
             }
         }
         else{
