@@ -59,7 +59,7 @@ public class BM25PExtended extends WeightingModel{
 
                 //Case C - 20,21 ... 18, 19 - we start from offset
                 if (offset + i < weights.length){
-                    weights[offset + percentage] = 1.0;
+                    weights[offset + i] = 1.0;
                 }
                 else {
                     weights[offset + i - percentage] = 1.0;
