@@ -27,6 +27,7 @@ public class BM25PExtended extends WeightingModel{
     private int alpha = 1;
     private int p = 100;
     private int percentage = 100;
+    private int offset = 30;
     double[] weights = new double[p]; // this will change to a different size in constructor
 
 
@@ -49,8 +50,19 @@ public class BM25PExtended extends WeightingModel{
         // we start adding 1 up to a certain percentage
         if (percentage <= weights.length) {
             for (int i = 0; i < percentage; i++) {
+                //Case A - 1 .. 100
 //                weights[i] = 1.0; // Incremental from 1..100
-                weights[weights.length-1-i] = 1.0; // Decremental from 100..1
+
+                //Case B - 100 .. 1
+//                weights[weights.length-1-i] = 1.0; // Decremental from 100..1
+                
+                //Case C - 20,21 ... 18, 19 - we start from offset
+                if (offset + i < weights.length){
+                    weights[offset + percentage] = 1.0;
+                }
+                else {
+                    weights[offset + i - percentage] = 1.0;
+                }
             }
         }
         else{
