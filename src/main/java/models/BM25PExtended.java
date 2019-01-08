@@ -95,6 +95,6 @@ public class BM25PExtended extends WeightingModel{
 
     @Override
     public String toString() {
-        return "BM25PAlpha";
+        return "BM25PExtended";
     }
 }
