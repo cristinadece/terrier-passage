@@ -42,6 +42,7 @@ public class BM25PExtended extends WeightingModel{
         alpha = Integer.parseInt(ApplicationSetup.getProperty("bm25p.alpha", "1"));
         p = Integer.parseInt(ApplicationSetup.getProperty("bm25p.p", "100"));
         percentage = Integer.parseInt(ApplicationSetup.getProperty("bm25p.percent", "100"));
+        offset = Integer.parseInt(ApplicationSetup.getProperty("bm25p.offset", "30"));
 
 
         weights = new double[p];
@@ -55,7 +56,7 @@ public class BM25PExtended extends WeightingModel{
 
                 //Case B - 100 .. 1
 //                weights[weights.length-1-i] = 1.0; // Decremental from 100..1
-                
+
                 //Case C - 20,21 ... 18, 19 - we start from offset
                 if (offset + i < weights.length){
                     weights[offset + percentage] = 1.0;
