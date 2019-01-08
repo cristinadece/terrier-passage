@@ -69,6 +69,7 @@ public class BM25PExtended extends WeightingModel{
         else{
             System.out.println("Percentage is bigger than the weights vector! Error!");
         }
+        System.out.println(Arrays.toString(weights));
     }
 
     public String getInfo() {
