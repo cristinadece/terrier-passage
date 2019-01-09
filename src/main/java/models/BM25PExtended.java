@@ -62,7 +62,7 @@ public class BM25PExtended extends WeightingModel{
                     weights[offset + i] = 1.0;
                 }
                 else {
-                    weights[offset + i - percentage] = 1.0;
+                    weights[offset + i - p] = 1.0;
                 }
             }
         }
