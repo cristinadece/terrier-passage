@@ -3,7 +3,7 @@ package util;
 import java.io.*;
 import java.util.Arrays;
 
-import com.sun.javafx.binding.StringFormatter;
+//import com.sun.javafx.binding.StringFormatter;
 import org.terrier.applications.batchquerying.TRECQuerying;
 import org.terrier.matching.ResultSet;
 import org.terrier.querying.Request;
