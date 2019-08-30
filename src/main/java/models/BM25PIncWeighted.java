@@ -68,10 +68,10 @@ public class BM25PIncWeighted extends WeightingModel{
 
                 //Case C - 20,21 ... 18, 19 - we start from offset
                 if (offset + i < binaryWeights.length){
-                    binaryWeights[offset + i] = 1.0 * weights[i/10];
+                    binaryWeights[offset + i] = 1.0 * weights[(offset+i)/10];
                 }
                 else {
-                    binaryWeights[offset + i - p] = 1.0 * weights[i/10];
+                    binaryWeights[offset + i - p] = 1.0 * weights[(offset + i - p)/10];
                 }
             }
         }
