@@ -54,7 +54,6 @@ public class BM25PIncWeighted extends WeightingModel{
                 .toArray();
 
         binaryWeights = new double[p];
-        System.out.println("Number of passages: " + String.valueOf(p));
         Arrays.fill(binaryWeights, 0.0); // init the array of binaryWeights to 0.0 for each weight
 
         // we start adding 1 up to a certain percentage
