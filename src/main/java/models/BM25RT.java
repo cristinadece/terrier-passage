@@ -103,10 +103,10 @@ public class BM25RT extends WeightingModel{
                     tf_RT = 1 + ISFLinear(lambda, docLen, pos);
                 }
                 else if (ISF.equals("cosine")){
-                    tf_RT = 1 + ISFLinear(lambda, docLen, pos);
+                    tf_RT = 1 + ISFCosine(lambda, docLen, pos);
                 }
                 else if (ISF.equals("parabola")){
-                    tf_RT = 1 + ISFLinear(lambda, docLen, pos);
+                    tf_RT = 1 + ISFParabola(lambda, docLen, pos);
                 }
             }
         }
